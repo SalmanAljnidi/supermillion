@@ -2,74 +2,364 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>من سيربح المليون | سلمان الجنيدي</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="images/icon-192.png">
     <meta name="theme-color" content="#020b2e">
+    <style>
+        /* --- التصميم (CSS) --- */
+        :root {
+            --bg-dark: #020b2e;
+            --bg-light: #101e52;
+            --gold: #d4af37;
+            --gold-glow: #f9d877;
+            --correct: #00c853;
+            --wrong: #d50000;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle at center, var(--bg-light), var(--bg-dark));
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+        }
+
+        /* رسم الشعار بالكود فقط */
+        .logo-box {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #004d40, #000);
+            border: 4px solid var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: var(--gold);
+            font-weight: bold;
+            box-shadow: 0 0 20px var(--gold);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        .logo-box::after { content: "؟"; }
+
+        @keyframes pulse { 0% { box-shadow: 0 0 20px var(--gold); } 50% { box-shadow: 0 0 40px var(--gold); } 100% { box-shadow: 0 0 20px var(--gold); } }
+
+        /* الشاشات */
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; }
+        .active { display: flex; }
+
+        /* النصوص والأزرار */
+        h1 { color: var(--gold); text-align: center; margin: 0; font-size: 2em; text-shadow: 2px 2px 4px #000; }
+        .sub-text { font-size: 0.8em; color: #aaa; margin-bottom: 30px; margin-top: 10px; }
+        
+        .btn-main {
+            background: linear-gradient(180deg, var(--gold), #8f7210);
+            border: 2px solid #fff;
+            padding: 15px 50px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+        }
+        .btn-main:active { transform: scale(0.95); }
+
+        /* منطقة اللعبة */
+        .game-header { width: 90%; display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1em; font-weight: bold; }
+        .stat-box { background: rgba(0,0,0,0.6); padding: 8px 15px; border: 1px solid var(--gold); border-radius: 15px; color: var(--gold); }
+
+        .question-box {
+            width: 90%;
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.8), transparent);
+            border-top: 2px solid var(--gold);
+            border-bottom: 2px solid var(--gold);
+            padding: 20px 0;
+            text-align: center;
+            font-size: 2.2em;
+            font-weight: bold;
+            margin-bottom: 30px;
+            min-height: 60px;
+            direction: ltr; /* للأرقام والمعادلات تظهر بشكل صحيح */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 95%; max-width: 600px; }
+        
+        .ans-btn {
+            background: linear-gradient(to bottom, #1a237e, #000051);
+            border: 2px solid #5c6bc0;
+            color: white;
+            padding: 15px;
+            border-radius: 30px;
+            font-size: 1.4rem;
+            cursor: pointer;
+            position: relative;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+        .ans-btn:hover { background: #283593; border-color: var(--gold); }
+        .ans-btn.selected { background: #ff9800; border-color: white; color: black; }
+        .ans-btn.correct { background: var(--correct); border-color: #b9f6ca; animation: blink 0.4s 3; }
+        .ans-btn.wrong { background: var(--wrong); border-color: #ff8a80; }
+
+        @keyframes blink { 50% { opacity: 0.5; } }
+
+        /* وسائل المساعدة */
+        .lifelines { display: flex; gap: 20px; margin-bottom: 20px; }
+        .life-btn {
+            width: 50px; height: 50px; border-radius: 50%;
+            background: transparent; border: 2px solid var(--gold);
+            color: var(--gold); font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; transition: 0.3s;
+        }
+        .life-btn:hover { background: var(--gold); color: #000; }
+        .life-btn:disabled { opacity: 0.3; cursor: not-allowed; border-color: #555; color: #555; text-decoration: line-through; }
+
+        /* زر التثبيت */
+        .install-btn {
+            position: absolute; top: 10px; left: 10px;
+            background: var(--gold); color: #000; border: none;
+            padding: 8px 15px; border-radius: 15px; font-weight: bold;
+            display: none; cursor: pointer; z-index: 100;
+        }
+
+        .footer { position: fixed; bottom: 5px; width: 100%; text-align: center; font-size: 12px; color: #666; }
+    </style>
 </head>
 <body>
 
-    <button id="installBtn" class="install-btn hidden">تثبيت اللعبة 📲</button>
+    <button id="installBtn" class="install-btn">تثبيت التطبيق 📲</button>
 
-    <audio id="sound-intro" src="sounds/intro.mp3"></audio>
-    <audio id="sound-correct" src="sounds/correct.mp3"></audio>
-    <audio id="sound-wrong" src="sounds/wrong.mp3"></audio>
-    <audio id="sound-wait" src="sounds/wait.mp3" loop></audio>
-    <audio id="sound-final" src="sounds/final.mp3"></audio>
+    <div id="startScreen" class="screen active">
+        <div class="logo-box"></div>
+        <h1>من سيربح المليون<br><span style="font-size:0.6em; color:white">ضرب وقسمة</span></h1>
+        <p class="sub-text">إعداد المعلم: سلمان الجنيدي</p>
+        <button class="btn-main" onclick="initGame()">ابدأ اللعبة</button>
+    </div>
 
-    <div class="game-wrapper">
-        <div id="start-screen" class="screen active">
-            <div class="logo-container">
-                <img src="images/logo.png" alt="شعار المليون" class="main-logo">
-            </div>
-            <h1 class="game-title">من سيربح المليون<br><span class="subtitle">ضرب وقسمة</span></h1>
-            <p class="teacher-name">إعداد المعلم: سلمان الجنيدي</p>
-            <button class="btn-start" onclick="startGame()">ابدأ المسابقة</button>
+    <div id="gameScreen" class="screen">
+        <div class="game-header">
+            <div class="stat-box">السؤال: <span id="qNum">١</span>/<span id="qTotal">١٥</span></div>
+            <div class="stat-box">الرصيد: <span id="qPrize">٠</span> ريال</div>
         </div>
 
-        <div id="game-screen" class="screen">
-            <div class="header">
-                <div class="prize-box">السؤال رقم: <span id="q-num">1</span></div>
-                <div class="prize-box">القيمة: <span id="q-prize">100</span> ريال</div>
-            </div>
-
-            <div class="lifelines">
-                <button id="btn-50" onclick="use5050()" title="حذف إجابتين">50:50</button>
-                <button id="btn-audience" onclick="useAudience()" title="رأي الجمهور">👥</button>
-                <button id="btn-call" onclick="useFriend()" title="اتصال بصديق">📞</button>
-            </div>
-
-            <div class="question-container">
-                <div class="question-text" id="question">جاري تحميل السؤال...</div>
-            </div>
-
-            <div class="answers-grid">
-                <button class="ans-btn" onclick="checkAnswer(0)" id="btn0"><span class="letter">أ:</span> <span id="opt0"></span></button>
-                <button class="ans-btn" onclick="checkAnswer(1)" id="btn1"><span class="letter">ب:</span> <span id="opt1"></span></button>
-                <button class="ans-btn" onclick="checkAnswer(2)" id="btn2"><span class="letter">ج:</span> <span id="opt2"></span></button>
-                <button class="ans-btn" onclick="checkAnswer(3)" id="btn3"><span class="letter">د:</span> <span id="opt3"></span></button>
-            </div>
+        <div class="lifelines">
+            <button class="life-btn" id="btn50" onclick="use5050()">50:50</button>
+            <button class="life-btn" id="btnAud" onclick="useAudience()">👥</button>
+            <button class="life-btn" id="btnCall" onclick="useFriend()">📞</button>
         </div>
 
-        <div id="end-screen" class="screen">
-            <h2 id="end-msg">مبروك!</h2>
-            <div class="final-score">ربحت: <span id="final-money">0</span> ريال</div>
-            <button class="btn-start" onclick="location.reload()">لعب مرة أخرى</button>
+        <div class="question-box" id="questionText"></div>
+
+        <div class="answers-grid">
+            <button class="ans-btn" id="opt0" onclick="checkAnswer(0)"></button>
+            <button class="ans-btn" id="opt1" onclick="checkAnswer(1)"></button>
+            <button class="ans-btn" id="opt2" onclick="checkAnswer(2)"></button>
+            <button class="ans-btn" id="opt3" onclick="checkAnswer(3)"></button>
         </div>
     </div>
 
-    <div class="footer">
-        جميع الحقوق محفوظة للمعلم سلمان الجنيدي © 2026
+    <div id="endScreen" class="screen">
+        <div class="logo-box" style="width:80px; height:80px; font-size:40px;"></div>
+        <h2 id="endMessage"></h2>
+        <h1 id="finalPrize" style="color:var(--gold)"></h1>
+        <br>
+        <button class="btn-main" onclick="location.reload()">لعب مرة أخرى</button>
     </div>
 
-    <script src="script.js"></script>
+    <div class="footer">جميع الحقوق محفوظة للمعلم سلمان الجنيدي © 2026</div>
+
     <script>
-        // تسجيل Service Worker
+        /* --- دالة تحويل الأرقام للعربية --- */
+        function toArabicNum(num) {
+            const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+            return num.toString().replace(/\d/g, d => arabicDigits[d]);
+        }
+
+        /* --- منطق اللعبة --- */
+        const prizes = [100, 200, 300, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 125000, 250000, 500000, 1000000];
+        let level = 0;
+        let correctIndex = 0;
+        let isLocked = false;
+        
+        // نظام الصوت (Web Audio API)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function beep(freq, duration, type='sine') {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            switch(type) {
+                case 'start': beep(600, 0.1, 'square'); setTimeout(()=>beep(800, 0.3, 'square'), 100); break;
+                case 'correct': beep(800, 0.1); setTimeout(()=>beep(1200, 0.4), 100); break;
+                case 'wrong': beep(150, 0.5, 'sawtooth'); break;
+                case 'wait': beep(400, 0.05); break;
+            }
+        }
+
+        function initGame() {
+            document.getElementById('startScreen').classList.remove('active');
+            document.getElementById('gameScreen').classList.add('active');
+            playSound('start');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            isLocked = false;
+            document.getElementById('qNum').innerText = toArabicNum(level + 1);
+            document.getElementById('qPrize').innerText = toArabicNum(prizes[level]);
+            
+            // إعادة ضبط الأزرار
+            for(let i=0; i<4; i++) {
+                let btn = document.getElementById('opt'+i);
+                btn.className = 'ans-btn';
+                btn.style.visibility = 'visible';
+            }
+
+            // --- خوارزمية الأسئلة (ضرب وقسمة 2-12) ---
+            let type = Math.random() > 0.5 ? 'mul' : 'div';
+            let n1, n2, ans, symbol;
+
+            if (type === 'mul') {
+                n1 = Math.floor(Math.random() * 11) + 2; // 2-12
+                n2 = Math.floor(Math.random() * 11) + 2; // 2-12
+                ans = n1 * n2;
+                symbol = '×';
+                // عرض السؤال بالأرقام العربية
+                document.getElementById('questionText').innerText = `${toArabicNum(ans)} = ${toArabicNum(n1)} ${symbol} ؟`;
+                // تصحيح: جعل السؤال بالصيغة القياسية (س × ص = ؟)
+                document.getElementById('questionText').innerText = `${toArabicNum(n1)} ${symbol} ${toArabicNum(n2)} = ؟`;
+            } else {
+                let divisor = Math.floor(Math.random() * 11) + 2; // المقسوم عليه
+                let res = Math.floor(Math.random() * 11) + 2;     // الناتج
+                n1 = divisor * res; // المقسوم
+                n2 = divisor;
+                ans = res;
+                symbol = '÷';
+                document.getElementById('questionText').innerText = `${toArabicNum(n1)} ${symbol} ${toArabicNum(n2)} = ؟`;
+            }
+
+            // الخيارات
+            let options = new Set([ans]);
+            while(options.size < 4) {
+                let diff = Math.floor(Math.random() * 5) + 1;
+                let wrong = Math.random() > 0.5 ? ans + diff : ans - diff;
+                if(wrong > 0 && wrong !== ans) options.add(wrong);
+                else options.add(Math.floor(Math.random() * 100) + 1);
+            }
+            
+            let arr = Array.from(options).sort(() => Math.random() - 0.5);
+            for(let i=0; i<4; i++) {
+                // عرض الخيارات بالأرقام العربية
+                document.getElementById('opt'+i).innerText = toArabicNum(arr[i]);
+                if(arr[i] === ans) correctIndex = i;
+            }
+        }
+
+        function checkAnswer(idx) {
+            if(isLocked) return;
+            isLocked = true;
+            let btn = document.getElementById('opt'+idx);
+            btn.classList.add('selected');
+            playSound('wait');
+
+            setTimeout(() => {
+                btn.classList.remove('selected');
+                if(idx === correctIndex) {
+                    btn.classList.add('correct');
+                    playSound('correct');
+                    setTimeout(() => {
+                        if(level < 14) { level++; loadQuestion(); }
+                        else gameOver(true);
+                    }, 2000);
+                } else {
+                    btn.classList.add('wrong');
+                    document.getElementById('opt'+correctIndex).classList.add('correct');
+                    playSound('wrong');
+                    setTimeout(() => gameOver(false), 2000);
+                }
+            }, 1500);
+        }
+
+        function gameOver(win) {
+            document.getElementById('gameScreen').classList.remove('active');
+            document.getElementById('endScreen').classList.add('active');
+            let msg = win ? "أنت المليونير!" : "حظاً أوفر";
+            let money = 0;
+            if(win) money = prizes[14];
+            else {
+                if(level >= 10) money = 32000;
+                else if(level >= 5) money = 1000;
+            }
+            document.getElementById('endMessage').innerText = msg;
+            document.getElementById('finalPrize').innerText = toArabicNum(money) + " ريال";
+        }
+
+        // المساعدات
+        function use5050() {
+            let btn = document.getElementById('btn50');
+            if(btn.disabled || isLocked) return;
+            btn.disabled = true;
+            let removed = 0;
+            for(let i=0; i<4; i++) {
+                if(i !== correctIndex && removed < 2 && Math.random()>0.5) {
+                    document.getElementById('opt'+i).style.visibility = 'hidden';
+                    removed++;
+                }
+            }
+        }
+
+        function useAudience() {
+            let btn = document.getElementById('btnAud');
+            if(btn.disabled || isLocked) return;
+            btn.disabled = true;
+            alert("الجمهور يرجح الإجابة الصحيحة بنسبة ٨٠٪!");
+        }
+
+        function useFriend() {
+            let btn = document.getElementById('btnCall');
+            if(btn.disabled || isLocked) return;
+            btn.disabled = true;
+            let val = document.getElementById('opt'+correctIndex).innerText;
+            alert(`المعلم سلمان يقول: أعتقد الجواب هو ${val}`);
+        }
+
+        // PWA Install
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+        });
+        installBtn.addEventListener('click', () => {
+            installBtn.style.display = 'none';
+            deferredPrompt.prompt();
+        });
+
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(() => console.log('Service Worker Registered'));
+            navigator.serviceWorker.register('sw.js');
         }
     </script>
 </body>
