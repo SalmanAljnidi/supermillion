@@ -1,18 +1,19 @@
 {
-  "name": "من سيربح المليون - رياضيات",
+  "name": "مسابقة الضرب والقسمة",
   "short_name": "المليون",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#020b2e",
   "theme_color": "#020b2e",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "images/icon-192.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/2997/2997018.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "images/icon-512.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/2997/2997018.png",
       "sizes": "512x512",
       "type": "image/png"
     }
