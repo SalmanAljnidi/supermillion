@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>من سيربح المليون - ضرب وقسمة | سلمان الجنيدي</title>
+    <style>
+        :root {
+            --main-blue: #020b2e;
+            --light-blue: #0f1b52;
+            --gold: #d4af37;
+            --correct: #00c853;
+            --wrong: #d50000;
+            --text-color: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle, var(--light-blue) 0%, var(--main-blue) 100%);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* حاوية اللعبة */
+        .game-container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
+        /* الشعار والعنوان */
+        .logo-area {
+            margin-bottom: 20px;
+        }
+        .logo-img {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(#2a3c85, #000);
+            border-radius: 50%;
+            border: 4px solid var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            font-size: 40px;
+            color: var(--gold);
+            font-weight: bold;
+            box-shadow: 0 0 20px var(--gold);
+        }
+
+        /* منطقة السؤال */
+        .question-box {
+            background: linear-gradient(90deg, transparent, #1a237e, transparent);
+            border: 2px solid var(--gold);
+            padding: 20px;
+            border-radius: 50px;
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: bold;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* خيارات الإجابة */
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .answer-btn {
+            background: linear-gradient(to bottom, #1a237e, #000051);
+            border: 2px solid #5c6bc0;
+            color: white;
+            padding: 15px;
+            border-radius: 30px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .answer-btn:hover {
+            background: #283593;
+            border-color: var(--gold);
+        }
+
+        .answer-btn.correct {
+            background: var(--correct);
+            border-color: #b9f6ca;
+            animation: blink 0.5s 3;
+        }
+
+        .answer-btn.wrong {
+            background: var(--wrong);
+            border-color: #ff8a80;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0.5; }
+        }
+
+        /* وسائل المساعدة */
+        .lifelines {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .lifeline-btn {
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            width: 60px;
+            height: 40px;
+            border-radius: 50%; /* شكل بيضاوي */
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+        
+        .lifeline-btn:hover {
+            background: var(--gold);
+            color: var(--main-blue);
+        }
+
+        .lifeline-btn.used {
+            border-color: #555;
+            color: #555;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+
+        /* سلم الجوائز */
+        .money-ladder {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 180px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column-reverse; /* لكي يبدأ من الأسفل */
+            overflow-y: auto;
+            border-right: 2px solid var(--gold);
+            z-index: 100;
+            transform: translateX(-100%); /* مخفي في الموبايل */
+            transition: transform 0.3s;
+        }
+
+        .money-ladder.active {
+            transform: translateX(0);
+        }
+
+        .ladder-item {
+            padding: 5px;
+            color: #ffab00;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .ladder-item.active {
+            background-color: var(--gold);
+            color: var(--main-blue);
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .ladder-item.milestone {
+            color: white;
+        }
+
+        /* زر إظهار القائمة في الموبايل */
+        .toggle-ladder {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: none;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 5px 10px;
+            cursor: pointer;
+            z-index: 101;
+        }
+
+        /* الحقوق */
+        .footer {
+            margin-top: auto;
+            padding: 10px;
+            font-size: 14px;
+            color: #aaa;
+            border-top: 1px solid #333;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* شاشات النهاية والبداية */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        
+        .hidden { display: none !important; }
+
+        .btn-start {
+            background: linear-gradient(45deg, var(--gold), #ff6f00);
+            border: none;
+            padding: 15px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--gold);
+        }
+
+        @media (max-width: 600px) {
+            .answers-grid {
+                grid-template-columns: 1fr;
+            }
+            .question-box {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="toggle-ladder" onclick="toggleLadder()">☰ القائمة</button>
+
+    <div class="money-ladder" id="moneyLadder">
+        </div>
+
+    <div id="startScreen" class="overlay">
+        <div class="logo-img" style="width: 150px; height: 150px; font-size: 60px; margin-bottom: 30px;">$</div>
+        <h1 style="color: var(--gold); text-align: center;">من سيربح المليون<br><span style="font-size: 0.6em; color: white;">ضرب وقسمة</span></h1>
+        <button class="btn-start" onclick="startGame()">ابدأ اللعبة</button>
+        <p style="margin-top: 20px; color: #888;">إعداد المعلم: سلمان الجنيدي</p>
+    </div>
+
+    <div id="endScreen" class="overlay hidden">
+        <h1 id="endMessage" style="color: white; margin-bottom: 20px;"></h1>
+        <h2 id="finalPrize" style="color: var(--gold); margin-bottom: 40px;"></h2>
+        <button class="btn-start" onclick="location.reload()">لعب مرة أخرى</button>
+    </div>
+
+    <div class="game-container">
+        <div class="logo-area">
+            <div class="logo-img">$</div>
+        </div>
+
+        <div class="lifelines">
+            <button class="lifeline-btn" id="btn5050" onclick="use5050()">50:50</button>
+            <button class="lifeline-btn" id="btnAudience" onclick="useAudience()">الجمهور</button>
+            <button class="lifeline-btn" id="btnFriend" onclick="useFriend()">صديق</button>
+        </div>
+
+        <div class="question-box" id="questionText">
+            جاري تحميل السؤال...
+        </div>
+
+        <div class="answers-grid">
+            <button class="answer-btn" onclick="checkAnswer(0)" id="opt0"></button>
+            <button class="answer-btn" onclick="checkAnswer(1)" id="opt1"></button>
+            <button class="answer-btn" onclick="checkAnswer(2)" id="opt2"></button>
+            <button class="answer-btn" onclick="checkAnswer(3)" id="opt3"></button>
+        </div>
+    </div>
+
+    <div class="footer">
+        جميع الحقوق محفوظة للمعلم سلمان الجنيدي © 2026
+    </div>
+
+    <script>
+        // إعدادات اللعبة
+        const prizes = [
+            "100", "200", "300", "500", "1,000", 
+            "2,000", "4,000", "8,000", "16,000", "32,000", 
+            "64,000", "125,000", "250,000", "500,000", "1,000,000"
+        ];
+        
+        let currentLevel = 0;
+        let correctAnswerIndex = 0;
+        let isGameActive = false;
+        let lifelines = { fifty: true, audience: true, friend: true };
+
+        // بناء سلم الجوائز
+        const ladderEl = document.getElementById('moneyLadder');
+        prizes.forEach((prize, index) => {
+            let item = document.createElement('div');
+            item.className = `ladder-item ${index % 5 === 4 ? 'milestone' : ''}`;
+            item.id = `level-${index}`;
+            item.innerHTML = `<span>${index + 1}</span> <span>${prize} SR</span>`;
+            ladderEl.appendChild(item);
+        });
+
+        function toggleLadder() {
+            ladderEl.classList.toggle('active');
+        }
+
+        function startGame() {
+            document.getElementById('startScreen').classList.add('hidden');
+            currentLevel = 0;
+            lifelines = { fifty: true, audience: true, friend: true };
+            updateLadder();
+            isGameActive = true;
+            generateQuestion();
+        }
+
+        function generateQuestion() {
+            // تنظيف الأنماط القديمة
+            for(let i=0; i<4; i++) {
+                let btn = document.getElementById(`opt${i}`);
+                btn.className = 'answer-btn';
+                btn.style.visibility = 'visible';
+                btn.disabled = false;
+            }
+
+            // تحديد نوع العملية عشوائياً (ضرب أو قسمة)
+            let isMultiplication = Math.random() > 0.5;
+            let num1, num2, correctAns, operatorSymbol;
+
+            if (isMultiplication) {
+                // ضرب: الأعداد من 2 إلى 12
+                num1 = Math.floor(Math.random() * 11) + 2; // 2 to 12
+                num2 = Math.floor(Math.random() * 11) + 2; // 2 to 12
+                correctAns = num1 * num2;
+                operatorSymbol = "×";
+                document.getElementById('questionText').innerText = `${num2} ${operatorSymbol} ${num1} = ؟`;
+            } else {
+                // قسمة: المقسوم عليه والناتج من 2 إلى 12
+                let divisor = Math.floor(Math.random() * 11) + 2; // 2 to 12
+                let quotient = Math.floor(Math.random() * 11) + 2; // 2 to 12
+                
+                num1 = divisor * quotient; // المقسوم (سيكون أكبر)
+                num2 = divisor;            // المقسوم عليه
+                correctAns = quotient;     // الناتج
+                operatorSymbol = "÷";
+                document.getElementById('questionText').innerText = `${num1} ${operatorSymbol} ${num2} = ؟`;
+            }
+
+            // توليد خيارات خاطئة ذكية (قريبة من الإجابة)
+            let answers = new Set();
+            answers.add(correctAns);
+
+            while(answers.size < 4) {
+                let offset = Math.floor(Math.random() * 5) + 1; // +1 to +5
+                let sign = Math.random() > 0.5 ? 1 : -1;
+                let wrong = correctAns + (offset * sign);
+                
+                // التأكد أن الخيار الخاطئ موجب وغير مكرر
+                if (wrong > 0 && wrong !== correctAns) {
+                    answers.add(wrong);
+                } else {
+                    // محاولة أخرى برقم عشوائي ضمن النطاق المقبول
+                    answers.add(Math.floor(Math.random() * 144) + 1);
+                }
+            }
+
+            // تحويل الـ Set إلى مصفوفة وخلطها
+            let answersArray = Array.from(answers);
+            answersArray.sort(() => Math.random() - 0.5);
+
+            // عرض الخيارات
+            for(let i=0; i<4; i++) {
+                document.getElementById(`opt${i}`).innerText = answersArray[i];
+                if (answersArray[i] === correctAns) {
+                    correctAnswerIndex = i;
+                }
+            }
+        }
+
+        function checkAnswer(selectedIndex) {
+            if (!isGameActive) return;
+            isGameActive = false; // منع النقر المتكرر
+
+            let selectedBtn = document.getElementById(`opt${selectedIndex}`);
+            let correctBtn = document.getElementById(`opt${correctAnswerIndex}`);
+
+            if (selectedIndex === correctAnswerIndex) {
+                // إجابة صحيحة
+                selectedBtn.classList.add('correct');
+                playAudio('correct'); // صوت افتراضي (غير مضاف هنا)
+                
+                setTimeout(() => {
+                    if (currentLevel === 14) {
+                        endGame(true);
+                    } else {
+                        currentLevel++;
+                        updateLadder();
+                        isGameActive = true;
+                        generateQuestion();
+                    }
+                }, 1500);
+            } else {
+                // إجابة خاطئة
+                selectedBtn.classList.add('wrong');
+                correctBtn.classList.add('correct');
+                setTimeout(() => {
+                    endGame(false);
+                }, 2000);
+            }
+        }
+
+        function updateLadder() {
+            // إزالة التنشيط السابق
+            document.querySelectorAll('.ladder-item').forEach(el => el.classList.remove('active'));
+            // تنشيط المستوى الحالي
+            let currentEl = document.getElementById(`level-${currentLevel}`);
+            if (currentEl) {
+                currentEl.classList.add('active');
+                currentEl.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+
+        function endGame(win) {
+            let message = win ? "مبروك! أنت المليونير!" : "للأسف! إجابة خاطئة";
+            let prizeIndex = currentLevel - 1;
+            
+            // نقاط الأمان (المحطات)
+            let safePrize = "0";
+            if (prizeIndex >= 9) safePrize = "32,000";
+            else if (prizeIndex >= 4) safePrize = "1,000";
+            
+            let finalAmount = win ? "1,000,000" : (prizeIndex < 0 ? "0" : safePrize);
+
+            document.getElementById('endMessage').innerText = message;
+            document.getElementById('finalPrize').innerText = `جائزتك: ${finalAmount} ريال`;
+            document.getElementById('endScreen').classList.remove('hidden');
+        }
+
+        // --- وسائل المساعدة ---
+
+        function use5050() {
+            if (!lifelines.fifty || !isGameActive) return;
+            lifelines.fifty = false;
+            document.getElementById('btn5050').classList.add('used');
+
+            let removedCount = 0;
+            let indices = [0, 1, 2, 3];
+            // خلط المؤشرات
+            indices.sort(() => Math.random() - 0.5);
+
+            for (let i of indices) {
+                if (i !== correctAnswerIndex && removedCount < 2) {
+                    document.getElementById(`opt${i}`).style.visibility = 'hidden';
+                    removedCount++;
+                }
+            }
+        }
+
+        function useAudience() {
+            if (!lifelines.audience || !isGameActive) return;
+            lifelines.audience = false;
+            document.getElementById('btnAudience').classList.add('used');
+
+            // محاكاة الجمهور: احتمالية عالية للإجابة الصحيحة
+            let correctPercent = Math.floor(Math.random() * 40) + 40; // 40-80%
+            alert(`تصويت الجمهور:\nالخيار الصحيح حصل على ${correctPercent}% من الأصوات!`);
+        }
+
+        function useFriend() {
+            if (!lifelines.friend || !isGameActive) return;
+            lifelines.friend = false;
+            document.getElementById('btnFriend').classList.add('used');
+            
+            let correctVal = document.getElementById(`opt${correctAnswerIndex}`).innerText;
+            alert(`صديقك المعلم سلمان يقول:\nأعتقد بنسبة كبيرة أن الإجابة هي ${correctVal}`);
+        }
+
+        // صوت بسيط (اختياري يمكن تفعيله لو توفرت ملفات)
+        function playAudio(type) {
+            // console.log("Sound:", type);
+        }
+
+    </script>
+</body>
+</html>
