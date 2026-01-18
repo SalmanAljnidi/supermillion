@@ -84,9 +84,20 @@ body {
     content: ''; position: absolute; top: 2px; left: 2px; right: 2px; bottom: 2px;
     border-top: 1px solid #6c8cd5; border-bottom: 1px solid #6c8cd5; z-index: -1;
 }
+
+/* --- بداية التعديل لحل مشكلة التعليق في الجوال --- */
 .answer-btn { cursor: pointer; justify-content: flex-start; padding-right: 35px; transition: 0s; }
-.answer-btn:hover { background: #f5a623; color: black; }
-.answer-btn:hover .prefix { color: black; }
+
+/* تأثير الـ Hover يظهر فقط إذا كان الجهاز يدعم الماوس */
+@media (hover: hover) {
+    .answer-btn:hover { background: #f5a623; color: black; }
+    .answer-btn:hover .prefix { color: black; }
+}
+
+/* تأثير عند الضغط باللمس (لحظي) */
+.answer-btn:active { background: #f5a623; color: black; }
+/* --- نهاية التعديل --- */
+
 .prefix { color: var(--gold); margin-left: 10px; font-weight: bold; }
 #question-text { font-size: 18px; font-weight: bold; z-index: 2; direction: ltr; }
 .selected { background: #ff9900 !important; color: black !important; }
